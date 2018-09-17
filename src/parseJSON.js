@@ -1,69 +1,119 @@
+
 // this is what you would do if you were one to do things the easy way:
 // var parseJSON = JSON.parse;
 
 // but you're not, so you'll write it from scratch:
 var parseJSON = function(json) {
 
-  var type = function() {
-    if (json[0] === '[') return 'array';
-    if (json[0] === '{') return 'object';
-    if (json[0] === '"') return 'string';
+  var type = function(str) {
+    if (str[0] === '[') return 'array';
+    if (str[0] === '{') return 'object';
+    if (str[0] === '"') return 'string';
     else return 'defualt';
   };
 
-  var splitter = function(inner) {
+  var splitter = function(inner) { //returns element array
     var chars = inner.split('');
-    var inQuotes = false;
-    var inArary = false;
-    var inObject = false;
+    var inQuotes;
+    var depth = 0;
+    var endChars = [];
     var elements = [];
     var holder = '';
 
     for (var i = 0; i < chars.length; i++) {
-      if (chars[i] === '[') {
-        inArray = true;
-      } else if (chars[i] === ']') {
-        inArray = false;
-      } else if (chars[i] === '{') {
-        inObject = true;
-      } else if (chars[i] === '}') {
-        inObject = false;
-      } else if (chars[i] === '"') {
+      if (chars[i] === '"') { //string
+        if(inQuotes) {//endquote needs to push
+          elements.push(holder);
+          holder = '';
+        }
         inQuotes = !inQuotes;
-      } else if (chars[i] === ',') {
+      } else if (inQuotes){ //add to holder if still in quotes
+        holder += chars[i];
+      } else if(chars[i] === ' '){
+        // do nothing
+      } else if(chars[i] === '['){ // testing for nested array/object
+        elements.push(holder);
+        endChars.push(']');     
+      } else if(chars[i] === '{'){
+        elements.push(holder);
+        endChars.push('}');
+      }
+      else if(chars[i] === endChars[endChars.length - 1]){ // encountered correct ] or }
+        endChars.pop();
+      }
+  
+      else if (chars[i] === ',' && endChars.length === 0) {// comma needs to push
         elements.push(holder);
         holder = '';
       } else {
-        holder += chars[i];
+        holder += chars[i]
       }
+    }
+    
+    if(holder != ''){
+      elements.push(holder); //end of inner needs a push
     }
     return elements;
   }
 
-  var result;
+  var recursivePJ = function(input){
+    console.log(input);
+    if(type(input) === 'default'){
+      if (input === 'null') {
+        return null;
+      } else if (input === 'true') {
+        return true;
+      } else if (input === 'false') {
+        return false;
+      } else {
+        return str;
+      }
+    }
+    if (type(input) === 'array') {
+      console.log('^^ this is an array');
+      var result = [];
+      if (input.length > 2){ 
+        var inner = input.slice(1, input.length -1);
+        var componentArray = splitter(inner); 
+        console.log('inner: ', inner)     
+        if (componentArray.length > 0) {
+          result = componentArray.map(x => recursivePJ(x));
+        }
+      }
+      return result; 
+    }
+     
+  }
 
-  if (type() === 'array') {
+  return recursivePJ(json);
+
+  
+  /*if (type() === 'array') {
     var inner = json.slice(1, json.length -1);
-    console.log(inner);
+    //console.log(inner);
+
+    var elements = splitter(inner);
+    //console.log('el:', elements);
     result = [];
     
     if (inner.length > 0) {
-      splitter(inner).forEach(x => result.push(parseJSON(x)));
+      elements.forEach(x => result.push(parseJSON(x)));
     }
     
     return result;
-  } else if (type === 'string') {
-    var inner = json.slice(1, json.length -1);
-    return parseJSON(inner);
-  } else if (type === 'default') {
+  } else if (type() === 'string') {
+    return json.slice(1, json.length -1);
+  } else if (type() === 'default') {
     if (json === 'null') {
       return null;
     } else if (json === 'true') {
       return true;
     } else if (json === 'false') {
       return false;
+    } else {
+      return json;
     }
-  }
+  }*/
 
   
 };

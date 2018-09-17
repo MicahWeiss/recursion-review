@@ -6,7 +6,7 @@ describe('parseJSON', function() {
       var result = parseJSON(test);
       var expected = JSON.parse(test);
 
-      console.log(result);
+      console.log('result', result);
       console.log(expected);
     
       expect(_.isEqual(result, expected));
