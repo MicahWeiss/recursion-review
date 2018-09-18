@@ -22,10 +22,7 @@ var parseJSON = function(json) {
 
     for (var i = 0; i < chars.length; i++) {
       if (chars[i] === '"') { //string
-        if(inQuotes) {//endquote needs to push
-          elements.push(holder);
-          holder = '';
-        }
+        holder += chars[i];
         inQuotes = !inQuotes;
       } else if (inQuotes){ //add to holder if still in quotes
         holder += chars[i];
@@ -75,14 +72,33 @@ var parseJSON = function(json) {
       if (input.length > 2){ 
         var inner = input.slice(1, input.length -1);
         var componentArray = splitter(inner); 
-        console.log('inner: ', inner)     
+        console.log('inner: ', inner);
+        console.log('componentArray: ', componentArray)     
         if (componentArray.length > 0) {
-          result = componentArray.map(x => recursivePJ(x));
+          componentArray.forEach(x => result.push(recursivePJ(x)));
         }
       }
       return result; 
     }
-     
+  
+    if (input.charAt(0) === '"'){
+      return input.slice(1, input.length -1);
+    }
+
+    if (type(input) === 'object'){
+      console.log('^^This is an object');
+      var result = {};
+      if(input.length > 2){
+        var inner = input.slice(1, input.length -1);
+        var componentKeys = splitter(inner);
+        console.log('compnentKeys: ', componentKeys);
+        for(var i =0; i < componentKeys.length; i++){
+          var parts = componentKeys[i].split(':');
+          result[parts[0]] = parts[1];
+        }        
+      }
+      return result;
+    }
   }
 
   return recursivePJ(json);

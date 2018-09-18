@@ -7,9 +7,9 @@ describe('parseJSON', function() {
       var expected = JSON.parse(test);
 
       console.log('result', result);
-      console.log(expected);
+      console.log('expected', expected);
     
-      expect(_.isEqual(result, expected));
+      expect(_.isEqual(result, expected)).to.equal(true);
       // Replace this line with an `expect` statement that tests
       // the behavior described by the `it` string
       //throw new Error('Test is missing.')
